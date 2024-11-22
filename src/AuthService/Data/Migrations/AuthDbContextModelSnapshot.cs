@@ -92,6 +92,19 @@ namespace AuthService.Data.Migrations
                         .IsUnique();
 
                     b.ToTable("Users");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = new Guid("1c816d1b-7aa7-4999-a16e-e8922cc3cd6a"),
+                            CreatedAt = new DateTime(2024, 11, 22, 9, 59, 43, 464, DateTimeKind.Utc).AddTicks(2859),
+                            Email = "admin@example.com",
+                            IsVerified = true,
+                            Password = "$2a$11$PqzDK6KLCZ8D/dxqP10dwOnqxnxr6ayvx.welNSmWzYFJyz6nMEha",
+                            RoleId = 1,
+                            UpdatedAt = new DateTime(2024, 11, 22, 9, 59, 43, 464, DateTimeKind.Utc).AddTicks(2861),
+                            UserName = "admin"
+                        });
                 });
 
             modelBuilder.Entity("AuthService.Models.VerifyEmail", b =>
@@ -131,6 +144,40 @@ namespace AuthService.Data.Migrations
                     b.ToTable("VerifyEmails");
                 });
 
+            modelBuilder.Entity("ResetPasswordToken", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime>("ExpiresAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<bool>("IsExpired")
+                        .HasColumnType("boolean");
+
+                    b.Property<bool>("IsUsed")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("Token")
+                        .HasColumnType("text");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("ResetPasswordTokens");
+                });
+
             modelBuilder.Entity("AuthService.Models.User", b =>
                 {
                     b.HasOne("AuthService.Models.Role", "Role")
@@ -143,6 +190,17 @@ namespace AuthService.Data.Migrations
                 });
 
             modelBuilder.Entity("AuthService.Models.VerifyEmail", b =>
+                {
+                    b.HasOne("AuthService.Models.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("ResetPasswordToken", b =>
                 {
                     b.HasOne("AuthService.Models.User", "User")
                         .WithMany()

@@ -52,6 +52,30 @@ namespace AuthService.Data.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "ResetPasswordTokens",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    UserId = table.Column<Guid>(type: "uuid", nullable: false),
+                    Token = table.Column<string>(type: "text", nullable: true),
+                    IsUsed = table.Column<bool>(type: "boolean", nullable: false),
+                    IsExpired = table.Column<bool>(type: "boolean", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    UpdatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    ExpiresAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ResetPasswordTokens", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_ResetPasswordTokens_Users_UserId",
+                        column: x => x.UserId,
+                        principalTable: "Users",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "VerifyEmails",
                 columns: table => new
                 {
@@ -85,6 +109,16 @@ namespace AuthService.Data.Migrations
                     { 2, "User" }
                 });
 
+            migrationBuilder.InsertData(
+                table: "Users",
+                columns: new[] { "Id", "CreatedAt", "Email", "IsVerified", "Password", "RoleId", "UpdatedAt", "UserName" },
+                values: new object[] { new Guid("1c816d1b-7aa7-4999-a16e-e8922cc3cd6a"), new DateTime(2024, 11, 22, 9, 59, 43, 464, DateTimeKind.Utc).AddTicks(2859), "admin@example.com", true, "$2a$11$PqzDK6KLCZ8D/dxqP10dwOnqxnxr6ayvx.welNSmWzYFJyz6nMEha", 1, new DateTime(2024, 11, 22, 9, 59, 43, 464, DateTimeKind.Utc).AddTicks(2861), "admin" });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ResetPasswordTokens_UserId",
+                table: "ResetPasswordTokens",
+                column: "UserId");
+
             migrationBuilder.CreateIndex(
                 name: "IX_Users_Email",
                 table: "Users",
@@ -111,6 +145,9 @@ namespace AuthService.Data.Migrations
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.DropTable(
+                name: "ResetPasswordTokens");
+
             migrationBuilder.DropTable(
                 name: "VerifyEmails");
 

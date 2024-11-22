@@ -8,15 +8,15 @@ services:
       POSTGRES_PASSWORD: mypassword
     ports:
       - "4444:5432"
-  app:
-    image: dotnet:latest
-    container_name: myapp
-    build:
-      context: ./src/AuthService
-      dockerfile: Dockerfile
-    environment:
-      ConnectionStrings__AuthDbContext: "Host=db;Port=5432;Database=mydb;Username=myuser;Password=mypassword"
-    depends_on:
-      - db
-    ports:
-      - "5000:8080"
+  # app:
+  #   image: dotnet:latest
+  #   container_name: myapp
+  #   build:
+  #     context: ./src/AuthService
+  #     dockerfile: Dockerfile
+  #   environment:
+  #     ConnectionStrings__AuthDbContext: "Host=db;Port=5432;Database=mydb;Username=myuser;Password=mypassword"
+  #   depends_on:
+  #     - db
+  #   ports:
+  #     - "5000:8080"

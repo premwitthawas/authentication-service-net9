@@ -14,6 +14,8 @@ public class AuthDbContext : DbContext
     public DbSet<Role> Roles { get; set; }
     public DbSet<VerifyEmail> VerifyEmails { get; set; }
 
+    public DbSet<ResetPasswordToken> ResetPasswordTokens { get; set; }
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<User>().Property(u => u.Id).ValueGeneratedOnAdd();
@@ -26,6 +28,15 @@ public class AuthDbContext : DbContext
             .WithMany()
             .HasForeignKey(u => u.RoleId)
             .OnDelete(DeleteBehavior.Restrict);
+        modelBuilder.Entity<User>().HasData(new User
+        {
+            Id = Guid.NewGuid(),
+            UserName = "admin",
+            Email = "admin@example.com",
+            Password = BCrypt.Net.BCrypt.HashPassword("admin"),
+            IsVerified = true,
+            RoleId = 1
+        });
 
         base.OnModelCreating(modelBuilder);
     }
