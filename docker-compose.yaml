@@ -1,0 +1,22 @@
+services:
+  db:
+    image: postgres:16.2-alpine3.19
+    container_name: mydb
+    environment:
+      POSTGRES_DB: mydb
+      POSTGRES_USER: myuser
+      POSTGRES_PASSWORD: mypassword
+    ports:
+      - "4444:5432"
+  app:
+    image: dotnet:latest
+    container_name: myapp
+    build:
+      context: ./src/AuthService
+      dockerfile: Dockerfile
+    environment:
+      ConnectionStrings__AuthDbContext: "Host=db;Port=5432;Database=mydb;Username=myuser;Password=mypassword"
+    depends_on:
+      - db
+    ports:
+      - "5000:8080"
