@@ -11,6 +11,8 @@ public interface IJwtTokenHelper
     bool ValidateJwtEmailVeifyToken(string token);
     string GenerateJwtResetPasswordToken(string email);
     string ValidateJwtResetPasswordToken(string token);
+    string GenerateJwtAccessToken(string userId);
+    string GenerateJwtRefeshToken(string userId);
 }
 
 public class JwtTokenHelper : IJwtTokenHelper
@@ -22,6 +24,22 @@ public class JwtTokenHelper : IJwtTokenHelper
         _configuration = configuration;
         _logger = logger;
     }
+
+    public string GenerateJwtAccessToken(string userId)
+    {
+        string acess_key = _configuration["Jwt:accessTokenSecret"].ToString();
+        var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(acess_key));
+        var creds = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
+        var token = new JwtSecurityToken(
+            claims: [new Claim(ClaimTypes.NameIdentifier, userId)],
+            expires: DateTime.UtcNow.AddMinutes(double.Parse(_configuration["Jwt:accessTokenExpiration"])),
+            signingCredentials: creds,
+            audience: _configuration["Jwt:Audience"].ToString(),
+            issuer: _configuration["Jwt:Issuer"].ToString()
+        );
+        this._logger.LogInformation($"Generated Access JWT token for user {userId}");
+        return new JwtSecurityTokenHandler().WriteToken(token);
+    }
     public string GenerateJwtEmailVeifyToken(string email)
     {
         string secret = _configuration["Jwt:VerifyEmailSecret"].ToString();
@@ -29,13 +47,27 @@ public class JwtTokenHelper : IJwtTokenHelper
         var creds = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
         var token = new JwtSecurityToken(
             claims: [new Claim(ClaimTypes.Email, email)],
-            expires: DateTime.Now.AddMinutes(15),
+            expires: DateTime.UtcNow.AddMinutes(15),
             signingCredentials: creds
         );
         this._logger.LogInformation($"Generated JWT token for email verification");
         return new JwtSecurityTokenHandler().WriteToken(token);
     }
-
+    public string GenerateJwtRefeshToken(string userId)
+    {
+        string acess_key = _configuration["Jwt:refeshTokenSecret"].ToString();
+        var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(acess_key));
+        var creds = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
+        var token = new JwtSecurityToken(
+            claims: [new Claim(ClaimTypes.NameIdentifier, userId)],
+            expires: DateTime.UtcNow.AddDays(double.Parse(_configuration["Jwt:refreshTokenExpiration"])),
+            signingCredentials: creds,
+            audience: _configuration["Jwt:Audience"].ToString(),
+            issuer: _configuration["Jwt:Issuer"].ToString()
+        );
+        this._logger.LogInformation($"Generated Refesh JWT token for user {userId}");
+        return new JwtSecurityTokenHandler().WriteToken(token);
+    }
     public string GenerateJwtResetPasswordToken(string email)
     {
         string secret = _configuration["Jwt:ResetPasswordSecret"].ToString();
@@ -43,7 +75,7 @@ public class JwtTokenHelper : IJwtTokenHelper
         var creds = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
         var token = new JwtSecurityToken(
             claims: [new Claim(ClaimTypes.Email, email)],
-            expires: DateTime.Now.AddMinutes(15),
+            expires: DateTime.UtcNow.AddMinutes(15),
             signingCredentials: creds
         );
         this._logger.LogInformation($"Generated JWT token for email verification");

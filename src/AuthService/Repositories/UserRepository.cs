@@ -67,7 +67,7 @@ public class UserRepository : IUserRepository
         catch (Exception ex)
         {
             this._logger.LogError(ex, "Error occurred while getting user by UserName.");
-            throw;
+            return null;
         }
     }
     public async Task<User> InsertUserAsync(User user)

@@ -11,6 +11,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{15141F15
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AuthService.Tests", "tests\AuthService.Tests\AuthService.Tests.csproj", "{1A82E732-C1E4-44BE-B6C0-80166B672203}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AuthenticationAspire.AppHost", "AuthenticationAspire.AppHost\AuthenticationAspire.AppHost.csproj", "{EA8B25B5-3B7B-4811-9996-79536D897441}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -28,6 +30,10 @@ Global
 		{1A82E732-C1E4-44BE-B6C0-80166B672203}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1A82E732-C1E4-44BE-B6C0-80166B672203}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1A82E732-C1E4-44BE-B6C0-80166B672203}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EA8B25B5-3B7B-4811-9996-79536D897441}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EA8B25B5-3B7B-4811-9996-79536D897441}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EA8B25B5-3B7B-4811-9996-79536D897441}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EA8B25B5-3B7B-4811-9996-79536D897441}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{D15DDE79-C582-4CC6-944B-C056C24CC202} = {51EE340C-A817-44AF-A23E-D3C2CCA36808}

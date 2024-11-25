@@ -8,14 +8,30 @@ namespace AuthService.Controllers
     [Route("api/[controller]")]
     public class AuthController : ControllerBase
     {
+        private readonly IAuthApplicaitonService _authApplicaitonService;
         private readonly IVerifyEmailService _verifyEmailService;
         private readonly IResetPasswordService _resetPasswordService;
         private readonly ILogger<AuthController> _logger;
-        public AuthController(ILogger<AuthController> logger, IResetPasswordService resetPasswordService, IVerifyEmailService verifyEmailService)
+        public AuthController(IAuthApplicaitonService applicaitonService, ILogger<AuthController> logger, IResetPasswordService resetPasswordService, IVerifyEmailService verifyEmailService)
         {
             _logger = logger;
             _resetPasswordService = resetPasswordService;
             _verifyEmailService = verifyEmailService;
+            _authApplicaitonService = applicaitonService;
+        }
+        [HttpPost("login")]
+        public async Task<IActionResult> LoginAsync([FromBody] LoginDto loginDto)
+        {
+            try
+            {
+                var response = await this._authApplicaitonService.LoginAsync(loginDto);
+                return StatusCode(response.StatusCode, response);
+            }
+            catch (Exception ex)
+            {
+                this._logger.LogError(ex, "Error occurred while logging in");
+                throw;
+            }
         }
         [HttpPost("send-verify-email")]
         public async Task<IActionResult> SendVerifyEmail([FromBody] SendVerifyEmailDto sendVerifyEmailDto)

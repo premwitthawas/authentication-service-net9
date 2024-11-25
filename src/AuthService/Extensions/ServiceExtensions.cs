@@ -9,6 +9,7 @@ public static class ServiceExtensions
         services.AddScoped<IUserService, UserService>();
         services.AddScoped<IVerifyEmailService, VerifyEmailService>();
         services.AddScoped<IResetPasswordService, ResetPasswordService>();
+        services.AddScoped<IAuthApplicaitonService, AuthApplicaitonService>();
         return services;
     }
 
