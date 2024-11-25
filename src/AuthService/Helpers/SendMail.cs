@@ -6,6 +6,7 @@ using MimeKit;
 public interface ISendMail
 {
     Task SendVerifyEmailAsync(string email, string token);
+    Task SendResetPasswordEmailAsync(string email, string token);
 }
 
 public class SendMail : ISendMail
@@ -27,6 +28,33 @@ public class SendMail : ISendMail
         _smtpPassword = _configuration["Smtp:Password"];
         _clientUrl = _configuration["Smtp:ClientUrl"];
     }
+
+    public async Task SendResetPasswordEmailAsync(string email, string token)
+    {
+         try
+        {
+            var message = new MimeMessage();
+            message.From.Add(new MailboxAddress("System", "noreply-system-authentication@localhost.local"));
+            message.To.Add(new MailboxAddress("User", email));
+            message.Subject = "Reset Password";
+            message.Body = new TextPart(MimeKit.Text.TextFormat.Html)
+            {
+                Text = $"<p>Click this link to Reset Password : <a href='http:/localhost:5243/api/auth/reset-password/{token}'>Click</a></p>"
+            };
+            using var client = new SmtpClient();
+            client.Connect(host: _smtpHost, port: _smtpPort, useSsl: false);
+            client.Authenticate(_smtpUsername, _smtpPassword);
+            await client.SendAsync(message);
+            await client.DisconnectAsync(quit: true);
+            this._logger.LogInformation($"Email sent {email}");
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex.Message);
+            throw;
+        }
+    }
+
     public async Task SendVerifyEmailAsync(string email, string token)
     {
         try
@@ -37,7 +65,7 @@ public class SendMail : ISendMail
             message.Subject = "Verify Email";
             message.Body = new TextPart(MimeKit.Text.TextFormat.Html)
             {
-                Text = $"<p>Click this link to verify your email : <a href='{this._clientUrl}/{token}'>{this._clientUrl}/{token}</a></p>"
+                Text = $"<p>Click this link to verify your email : <a href='{this._clientUrl}/{token}'>Click</a></p>"
             };
             using var client = new SmtpClient();
             client.Connect(host: _smtpHost, port: _smtpPort, useSsl: false);

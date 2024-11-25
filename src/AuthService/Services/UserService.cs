@@ -43,7 +43,7 @@ public class UserService : IUserService
         }
         try
         {
-            var existingUser = await this._userRepository.SelectUserByUsername(createUserDto.Username);
+            var existingUser = await this._userRepository.SelectUserByUsernameAsync(createUserDto.Username);
             if (existingUser != null)
             {
                 throw new InvalidOperationException($"Username: {createUserDto.Username} already exists.");
@@ -56,7 +56,7 @@ public class UserService : IUserService
                 Password = hashedPassword,
                 RoleId = 2
             };
-            var result = await this._userRepository.InsertUser(user);
+            var result = await this._userRepository.InsertUserAsync(user);
             return new ResponseCreateUserDto(result.Id, result.UserName, result.Email);
         }
         catch (Exception ex)

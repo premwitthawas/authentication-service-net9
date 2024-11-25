@@ -9,6 +9,7 @@ namespace AuthService.Services;
 public interface IVerifyEmailService
 {
     Task<ResponseMessageDto> CreateTokenVerifyEmail(string email);
+    Task<ResponseMessageDto> VerifyEmail(string token);
 }
 
 public class VerifyEmailService : IVerifyEmailService
@@ -26,7 +27,6 @@ public class VerifyEmailService : IVerifyEmailService
         _sendMail = sendMail;
         _jwtTokenHelper = jwtTokenHelper;
     }
-
     public async Task<ResponseMessageDto> CreateTokenVerifyEmail(string email)
     {
         if (string.IsNullOrEmpty(email))
@@ -37,21 +37,22 @@ public class VerifyEmailService : IVerifyEmailService
 
         try
         {
-            var user = await this._userRepository.SelectUserByEmail(email);
+            var user = await this._userRepository.SelectUserByEmailAsync(email);
             if (user == null)
             {
                 this._logger.LogError("User not found for email: {Email}", email);
                 return new ResponseMessageDto("User not found");
             }
 
-            if(user.IsVerified)
+            if (user.IsVerified)
             {
                 this._logger.LogError("Email already verified for user ID: {UserId}", user.Id);
                 return new ResponseMessageDto("Email already verified");
             }
 
             var existingToken = await this._verifyEmailRepository.SelectVerifyByUserId(user.Id);
-            if(existingToken != null) {
+            if (existingToken != null)
+            {
                 await this._verifyEmailRepository.DeleteVerifyEmailAsync(existingToken.Id);
             }
 
@@ -80,4 +81,34 @@ public class VerifyEmailService : IVerifyEmailService
         }
     }
 
+    public async Task<ResponseMessageDto> VerifyEmail(string token)
+    {
+        if (token == null)
+        {
+            this._logger.LogError("Token is null");
+            return new ResponseMessageDto("Invalid token");
+        }
+        try
+        {
+            var existingToken = await this._verifyEmailRepository.SelectVerifyByToken(token);
+            if (!this._jwtTokenHelper.ValidateJwtEmailVeifyToken(token))
+            {
+                this._logger.LogError("Token is invalid");
+                return new ResponseMessageDto("Invalid token or expired");
+            }
+            if (existingToken.ExpiresAt < DateTime.UtcNow)
+            {
+                this._logger.LogError("Token is expired");
+                return new ResponseMessageDto("Token is expired");
+            }
+            await this._userRepository.UpdateVerifyEmailAsync(existingToken.UserId);
+            await this._verifyEmailRepository.DeleteVerifyEmailAsync(existingToken.Id);
+            return new ResponseMessageDto("Email verified successfully");
+        }
+        catch
+        {
+            this._logger.LogError("Error occurred while verifying email");
+            throw;
+        }
+    }
 }

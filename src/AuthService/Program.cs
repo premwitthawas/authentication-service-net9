@@ -1,5 +1,5 @@
 using AuthService.Data;
-using AuthService.Helpers;
+using AuthService.Extensions;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);

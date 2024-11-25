@@ -1,5 +1,6 @@
 using System.Text.RegularExpressions;
 using AuthService.Data;
+using AuthService.Helpers;
 using AuthService.Models;
 using Microsoft.EntityFrameworkCore;
 
@@ -7,11 +8,12 @@ namespace AuthService.Repositories;
 
 public interface IUserRepository
 {
-    Task<User> InsertUser(User user);
-    Task<User> SelectUserByEmail(string email);
-    Task<User> SelectUserByUsername(string username);
-    Task<User> SelectUserById(Guid id);
-    Task<bool> UpdateVerifyEmail(Guid userId);
+    Task<User> InsertUserAsync(User user);
+    Task<User> SelectUserByEmailAsync(string email);
+    Task<User> SelectUserByUsernameAsync(string username);
+    Task<User> SelectUserByIdAsync(Guid id);
+    Task<bool> UpdateVerifyEmailAsync(Guid userId);
+    Task<bool> UpdatePasswordByEmailAsync(string email, string Password);
 }
 public class UserRepository : IUserRepository
 {
@@ -22,11 +24,11 @@ public class UserRepository : IUserRepository
         _context = context;
         _logger = logger;
     }
-    public async Task<User> SelectUserByEmail(string email)
+    public async Task<User> SelectUserByEmailAsync(string email)
     {
         return await this._context.Users.FirstOrDefaultAsync<User>(u => u.Email == email);
     }
-    public async Task<User> SelectUserById(Guid id)
+    public async Task<User> SelectUserByIdAsync(Guid id)
     {
         if (string.IsNullOrWhiteSpace(id.ToString()))
         {
@@ -47,7 +49,7 @@ public class UserRepository : IUserRepository
             throw;
         }
     }
-    public async Task<User> SelectUserByUsername(string username)
+    public async Task<User> SelectUserByUsernameAsync(string username)
     {
         if (string.IsNullOrWhiteSpace(username))
         {
@@ -68,7 +70,7 @@ public class UserRepository : IUserRepository
             throw;
         }
     }
-    public async Task<User> InsertUser(User user)
+    public async Task<User> InsertUserAsync(User user)
     {
         if (user == null)
         {
@@ -86,8 +88,7 @@ public class UserRepository : IUserRepository
             throw;
         }
     }
-
-    public async Task<bool> UpdateVerifyEmail(Guid userId)
+    public async Task<bool> UpdateVerifyEmailAsync(Guid userId)
     {
         if (string.IsNullOrWhiteSpace(userId.ToString()))
         {
@@ -110,6 +111,33 @@ public class UserRepository : IUserRepository
         catch (System.Exception)
         {
             this._logger.LogError("Error occurred while updating user verify email.");
+            throw;
+        }
+    }
+
+    public async Task<bool> UpdatePasswordByEmailAsync(string email, string Password)
+    {
+        if (string.IsNullOrWhiteSpace(Password))
+        {
+            this._logger.LogError("Password is null or empty");
+            throw new ArgumentNullException(nameof(Password), "Password cannot be null or empty.");
+        }
+        try
+        {
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == email);
+            if (user == null)
+            {
+                this._logger.LogError("User not found for email: {email}", email);
+                return false;
+            }
+            user.Password = Password;
+            await this._context.SaveChangesAsync();
+            this._logger.LogInformation("User password updated for email: {email}", email);
+            return true;
+        }
+        catch (Exception ex)
+        {
+            this._logger.LogError(ex, "Error occurred while updating user password.");
             throw;
         }
     }

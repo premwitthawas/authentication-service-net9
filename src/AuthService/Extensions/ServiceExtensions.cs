@@ -1,13 +1,14 @@
+using AuthService.Helpers;
 using AuthService.Repositories;
 using AuthService.Services;
-namespace AuthService.Helpers;
+namespace AuthService.Extensions;
 public static class ServiceExtensions
 {
     public static IServiceCollection AddApplicationServices(this IServiceCollection services)
     {
         services.AddScoped<IUserService, UserService>();
         services.AddScoped<IVerifyEmailService, VerifyEmailService>();
-        services.AddScoped<IAuthApplicationService, AuthApplicationService>();
+        services.AddScoped<IResetPasswordService, ResetPasswordService>();
         return services;
     }
 
@@ -15,6 +16,7 @@ public static class ServiceExtensions
     {
         services.AddScoped<IUserRepository, UserRepository>();
         services.AddScoped<IVerifyEmailRepository, VerifyEmailRepository>();
+        services.AddScoped<IResetPasswordRepository, ResetPasswordRepository>();
         return services;
     }
 

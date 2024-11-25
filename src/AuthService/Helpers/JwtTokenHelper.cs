@@ -9,6 +9,8 @@ public interface IJwtTokenHelper
 {
     string GenerateJwtEmailVeifyToken(string email);
     bool ValidateJwtEmailVeifyToken(string token);
+    string GenerateJwtResetPasswordToken(string email);
+    string ValidateJwtResetPasswordToken(string token);
 }
 
 public class JwtTokenHelper : IJwtTokenHelper
@@ -23,6 +25,20 @@ public class JwtTokenHelper : IJwtTokenHelper
     public string GenerateJwtEmailVeifyToken(string email)
     {
         string secret = _configuration["Jwt:VerifyEmailSecret"].ToString();
+        var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secret));
+        var creds = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
+        var token = new JwtSecurityToken(
+            claims: [new Claim(ClaimTypes.Email, email)],
+            expires: DateTime.Now.AddMinutes(15),
+            signingCredentials: creds
+        );
+        this._logger.LogInformation($"Generated JWT token for email verification");
+        return new JwtSecurityTokenHandler().WriteToken(token);
+    }
+
+    public string GenerateJwtResetPasswordToken(string email)
+    {
+        string secret = _configuration["Jwt:ResetPasswordSecret"].ToString();
         var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secret));
         var creds = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
         var token = new JwtSecurityToken(
@@ -57,6 +73,34 @@ public class JwtTokenHelper : IJwtTokenHelper
         {
             this._logger.LogError($"Error validating JWT token for email verification: {ex.Message}");
             return false;
+        }
+    }
+
+    public string ValidateJwtResetPasswordToken(string token)
+    {
+        string secret = _configuration["Jwt:ResetPasswordSecret"].ToString();
+        var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secret));
+        var tokenHandler = new JwtSecurityTokenHandler();
+        try
+        {
+            var tokenParameters = new TokenValidationParameters
+            {
+                ValidateIssuerSigningKey = true,
+                IssuerSigningKey = securityKey,
+                ValidateIssuer = false,
+                ValidateAudience = false,
+                ValidateLifetime = true,
+                ClockSkew = TimeSpan.Zero
+            };
+            tokenHandler.ValidateToken(token, tokenParameters, out SecurityToken validatedToken);
+            var jwtToken = validatedToken as JwtSecurityToken;
+            this._logger.LogInformation($"Validated JWT token for reset password verification");
+            return jwtToken.Claims.First(claim => claim.Type == ClaimTypes.Email).Value;
+        }
+        catch (Exception ex)
+        {
+            this._logger.LogError($"Error validating JWT token for reset password verification: {ex.Message}");
+            return null;
         }
     }
 }
