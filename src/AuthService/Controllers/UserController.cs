@@ -21,22 +21,8 @@ namespace AuthService.Controllers
         {
             try
             {
-                var response = await this._userService.RegisterUser(createUserDto);
-                return Ok(response);
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(ex.Message);
-            }
-        }
-    
-        [HttpPost("send-verify-email")]
-        public async Task<IActionResult> SendVerifyEmail([FromBody] SendVerifyEmailDto sendVerifyEmailDto)
-        {
-            try
-            {
-                var response = await this._verifyEmailService.CreateTokenVerifyEmail(sendVerifyEmailDto.Email);
-                return Ok(response);
+                var response = await this._userService.RegisterUserAsync(createUserDto);
+                return StatusCode(response.StatusCode, response);
             }
             catch (Exception ex)
             {

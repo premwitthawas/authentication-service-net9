@@ -8,15 +8,25 @@ services:
       POSTGRES_PASSWORD: mypassword
     ports:
       - "4444:5432"
-  # app:
-  #   image: dotnet:latest
-  #   container_name: myapp
-  #   build:
-  #     context: ./src/AuthService
-  #     dockerfile: Dockerfile
-  #   environment:
-  #     ConnectionStrings__AuthDbContext: "Host=db;Port=5432;Database=mydb;Username=myuser;Password=mypassword"
-  #   depends_on:
-  #     - db
-  #   ports:
-  #     - "5000:8080"
+  prometheus:
+    image: prom/prometheus
+    container_name: myprometheus
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+    ports:
+      - "9090:9090"
+  node-exporter:
+    image: prom/node-exporter
+    container_name: mynodeexporter
+    ports:
+      - "9100:9100"
+  grafana:
+    image: grafana/grafana-oss
+    container_name: mygrafana
+    ports:
+      - "8080:3000"
+    volumes:
+      - grafana-data:/var/lib/grafana
+volumes:
+  grafana-data:
+    driver: local

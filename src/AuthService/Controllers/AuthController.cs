@@ -17,6 +17,19 @@ namespace AuthService.Controllers
             _resetPasswordService = resetPasswordService;
             _verifyEmailService = verifyEmailService;
         }
+        [HttpPost("send-verify-email")]
+        public async Task<IActionResult> SendVerifyEmail([FromBody] SendVerifyEmailDto sendVerifyEmailDto)
+        {
+            try
+            {
+                var response = await this._verifyEmailService.CreateTokenVerifyEmail(sendVerifyEmailDto.Email);
+                return Ok(response);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
         [HttpGet("verify-email/{token}")]
         public async Task<IActionResult> VerifyEmail(string token)
         {
@@ -40,16 +53,11 @@ namespace AuthService.Controllers
         [HttpPost("send-reset-password/{id}")]
         public async Task<IActionResult> SendResetPassword(string id)
         {
-            if (string.IsNullOrEmpty(id))
-            {
-                this._logger.LogError("Token is null");
-                return BadRequest("Invalid token");
-            }
             try
             {
                 var response = await this._resetPasswordService.CreateResetPasswordTokenAsync(Guid.Parse(id));
                 this._logger.LogInformation("Password reset successfully");
-                return Ok(response);
+                return StatusCode(response.StatusCode, response);
             }
             catch
             {
@@ -63,7 +71,7 @@ namespace AuthService.Controllers
             try
             {
                 var response = await this._resetPasswordService.UpdatePasswordByTokenAsync(resetPasswordDto);
-                return Ok(response);
+                return StatusCode(response.StatusCode, response);
             }
             catch (Exception ex)
             {

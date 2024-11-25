@@ -8,7 +8,7 @@ namespace AuthService.Services;
 
 public interface IUserService
 {
-    Task<ResponseCreateUserDto> RegisterUser(CreateUserDto createUserDto);
+    Task<ResponseServiceDto<ResponseCreateUserDto>> RegisterUserAsync(CreateUserDto createUserDto);
 }
 
 public class UserService : IUserService
@@ -23,30 +23,30 @@ public class UserService : IUserService
         _passwordHashedHelper = passwordHashedHelper;
     }
 
-    public async Task<ResponseCreateUserDto> RegisterUser(CreateUserDto createUserDto)
+    public async Task<ResponseServiceDto<ResponseCreateUserDto>> RegisterUserAsync(CreateUserDto createUserDto)
     {
         if (createUserDto == null)
         {
-            throw new ArgumentNullException(nameof(createUserDto), "CreateUserDto cannot be null.");
+            return new ResponseServiceDto<ResponseCreateUserDto>(null, "CreateUserDto cannot be null.", false, 400);
         }
         if (string.IsNullOrWhiteSpace(createUserDto.Username))
         {
-            throw new ArgumentNullException(nameof(createUserDto.Username), "Username cannot be null or empty.");
+            return new ResponseServiceDto<ResponseCreateUserDto>(null, "Username cannot be null or empty.", false, 400);
         }
         if (string.IsNullOrWhiteSpace(createUserDto.Email))
         {
-            throw new ArgumentNullException(nameof(createUserDto.Email), "Email cannot be null or empty.");
+            return new ResponseServiceDto<ResponseCreateUserDto>(null, "Email cannot be null or empty.", false, 400);
         }
         if (string.IsNullOrWhiteSpace(createUserDto.Password))
         {
-            throw new ArgumentNullException(nameof(createUserDto.Password), "Password cannot be null or empty.");
+            return new ResponseServiceDto<ResponseCreateUserDto>(null, "Password cannot be null or empty.", false, 400);
         }
         try
         {
             var existingUser = await this._userRepository.SelectUserByUsernameAsync(createUserDto.Username);
             if (existingUser != null)
             {
-                throw new InvalidOperationException($"Username: {createUserDto.Username} already exists.");
+                return new ResponseServiceDto<ResponseCreateUserDto>(null, "Username already exists.", false, 400);
             }
             string hashedPassword = this._passwordHashedHelper.HashPassword(createUserDto.Password);
             User user = new()
@@ -57,12 +57,12 @@ public class UserService : IUserService
                 RoleId = 2
             };
             var result = await this._userRepository.InsertUserAsync(user);
-            return new ResponseCreateUserDto(result.Id, result.UserName, result.Email);
+            return new ResponseServiceDto<ResponseCreateUserDto>(new ResponseCreateUserDto(result.Id, result.UserName, result.Email), "User registered successfully.", true, 201);
         }
         catch (Exception ex)
         {
             this._logger.LogError(ex, "Error occurred while registering user.");
-            throw;
+            return new ResponseServiceDto<ResponseCreateUserDto>(null, "Error occurred while registering user.", false, 500);
         }
     }
 }

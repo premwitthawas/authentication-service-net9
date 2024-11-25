@@ -39,7 +39,7 @@ public class SendMail : ISendMail
             message.Subject = "Reset Password";
             message.Body = new TextPart(MimeKit.Text.TextFormat.Html)
             {
-                Text = $"<p>Click this link to Reset Password : <a href='http:/localhost:5243/api/auth/reset-password/{token}'>Click</a></p>"
+                Text = $"<p>Click this link to Reset Password : <a href='{this._clientUrl}/api/auth/reset-password/{token}'>Click</a></p>"
             };
             using var client = new SmtpClient();
             client.Connect(host: _smtpHost, port: _smtpPort, useSsl: false);
@@ -65,7 +65,7 @@ public class SendMail : ISendMail
             message.Subject = "Verify Email";
             message.Body = new TextPart(MimeKit.Text.TextFormat.Html)
             {
-                Text = $"<p>Click this link to verify your email : <a href='{this._clientUrl}/{token}'>Click</a></p>"
+                Text = $"<p>Click this link to verify your email : <a href='{this._clientUrl}/api/auth/verify-email/{token}'>Click</a></p>"
             };
             using var client = new SmtpClient();
             client.Connect(host: _smtpHost, port: _smtpPort, useSsl: false);
