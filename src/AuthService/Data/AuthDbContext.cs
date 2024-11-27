@@ -13,11 +13,20 @@ public class AuthDbContext : DbContext
     public DbSet<User> Users { get; set; }
     public DbSet<Role> Roles { get; set; }
     public DbSet<VerifyEmail> VerifyEmails { get; set; }
-
     public DbSet<ResetPasswordToken> ResetPasswordTokens { get; set; }
-
+    public DbSet<Permission> Permissions { get; set; }
+    public DbSet<Session> Sessions { get; set; }
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        modelBuilder.Entity<Permission>().HasData(new Permission
+        {
+            Id = 1,
+            Name = "ReadOnly",
+            Read = true,
+            Write = false,
+            Update = false,
+            Delete = false
+        });
         modelBuilder.Entity<User>().Property(u => u.Id).ValueGeneratedOnAdd();
         modelBuilder.Entity<User>().HasIndex(u => u.Email).IsUnique();
         modelBuilder.Entity<User>().HasIndex(u => u.UserName).IsUnique();
@@ -35,9 +44,9 @@ public class AuthDbContext : DbContext
             Email = "admin@example.com",
             Password = BCrypt.Net.BCrypt.HashPassword("admin"),
             IsVerified = true,
-            RoleId = 1
+            RoleId = 1,
+            PermissionId = 1
         });
-
         base.OnModelCreating(modelBuilder);
     }
 }

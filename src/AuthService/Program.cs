@@ -2,6 +2,7 @@ using AuthService.Data;
 using AuthService.Extensions;
 using Microsoft.EntityFrameworkCore;
 using OpenTelemetry.Metrics;
+using StackExchange.Redis;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddOpenTelemetry().WithMetrics(builder =>
@@ -17,6 +18,7 @@ builder.Services.AddOpenTelemetry().WithMetrics(builder =>
             });
 });
 builder.Services.AddDbContext<AuthDbContext>(options => options.UseNpgsql(builder.Configuration.GetConnectionString("AuthDbContext")));
+builder.Services.AddSingleton<IConnectionMultiplexer>(ConnectionMultiplexer.Connect(builder.Configuration["Redis"].ToString()));
 builder.Services.AddControllers();
 builder.Services.AddOpenApi();
 builder.Services.AddHealthChecks();

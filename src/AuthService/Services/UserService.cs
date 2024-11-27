@@ -54,7 +54,8 @@ public class UserService : IUserService
                 UserName = createUserDto.Username,
                 Email = createUserDto.Email,
                 Password = hashedPassword,
-                RoleId = 2
+                RoleId = 2,
+                PermissionId = 1
             };
             var result = await this._userRepository.InsertUserAsync(user);
             return new ResponseServiceDto<ResponseCreateUserDto>(new ResponseCreateUserDto(result.Id, result.UserName, result.Email), "User registered successfully.", true, 201);

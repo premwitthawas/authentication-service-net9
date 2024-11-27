@@ -1,5 +1,3 @@
 var builder = DistributedApplication.CreateBuilder(args);
-
-builder.AddProject<Projects.AuthService>("AuthService");
-
+var authenticationService = builder.AddProject<Projects.AuthService>("AuthenticationService");
 builder.Build().Run();
